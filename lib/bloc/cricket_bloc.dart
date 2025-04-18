@@ -3,12 +3,11 @@ import 'package:bloc/bloc.dart';
 import 'package:cricket_score_app/bloc/cricket_event.dart';
 import 'package:cricket_score_app/bloc/cricket_state.dart';
 import 'package:cricket_score_app/models/cricket_score.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
-
+import 'package:dio/dio.dart';
 
 class CricketBloc extends Bloc<CricketEvent, CricketState> {
   final String apiUrl = 'https://mp357760872f36b8d270.free.beeceptor.com/data';
+  final Dio _dio = Dio();
   Timer? _timer;
 
   CricketBloc() : super(CricketInitial()) {
@@ -22,34 +21,30 @@ class CricketBloc extends Bloc<CricketEvent, CricketState> {
     });
   }
 
-Future<void> _onFetchCricketScores(
-  FetchCricketScores event,
-  Emitter<CricketState> emit,
-) async {
-  emit(CricketLoadInProgress());
-  try {
-    final response = await http.get(Uri.parse(apiUrl));
-    print(response);
-    if (response.statusCode == 200) {
-      final dynamic data = json.decode(response.body);
-          print(data);
+  Future<void> _onFetchCricketScores(
+    FetchCricketScores event,
+    Emitter<CricketState> emit,
+  ) async {
+    emit(CricketLoadInProgress());
+    try {
+      final response = await _dio.get(apiUrl);
+      print(response.data);
 
       List<CricketScore> scores = [];
-      
-      if (data is List) {
-        scores = data.map((json) => CricketScore.fromJson(json)).toList();
-      } else if (data is Map<String, dynamic>) {
-        scores = [CricketScore.fromJson(data)];
-      } 
-      
+
+      if (response.data is List) {
+        scores = (response.data as List)
+            .map((json) => CricketScore.fromJson(json))
+            .toList();
+      } else if (response.data is Map<String, dynamic>) {
+        scores = [CricketScore.fromJson(response.data)];
+      }
+
       emit(CricketLoadSuccess(scores));
-    } else {
-      emit(CricketLoadFailure('Failed to load scores'));
+    } catch (e) {
+      emit(CricketLoadFailure(e.toString()));
     }
-  } catch (e) {
-    emit(CricketLoadFailure(e.toString()));
   }
-}
 
   @override
   Future<void> close() {
