@@ -13,7 +13,6 @@ class CricketBloc extends Bloc<CricketEvent, CricketState> {
 
   CricketBloc() : super(CricketInitial()) {
     on<FetchCricketScores>(_onFetchCricketScores);
-    // Start polling immediately when the bloc is created
     _startPolling();
   }
 
@@ -38,10 +37,8 @@ Future<void> _onFetchCricketScores(
       List<CricketScore> scores = [];
       
       if (data is List) {
-        // Handle array response
         scores = data.map((json) => CricketScore.fromJson(json)).toList();
       } else if (data is Map<String, dynamic>) {
-        // Handle single object response
         scores = [CricketScore.fromJson(data)];
       } 
       

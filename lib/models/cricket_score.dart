@@ -26,7 +26,6 @@ factory CricketScore.fromJson(Map<String, dynamic> json) {
       lastUpdated: _parseDateTime(json['lastUpdated']),
     );
   } catch (e) {
-    // Return default values if parsing fails
     return CricketScore(
       matchId: 'N/A',
       team1: 'Team 1',
