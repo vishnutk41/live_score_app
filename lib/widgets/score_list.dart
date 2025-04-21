@@ -1,90 +1,64 @@
-import 'package:cricket_score_app/bloc/cricket_event.dart';
 import 'package:cricket_score_app/models/cricket_score.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
+class UsersList extends StatelessWidget {
+  final List<User> users;
 
-import '../bloc/cricket_bloc.dart';
+  const UsersList({super.key, required this.users});
 
-
-class ScoresList extends StatefulWidget {
-  final List<CricketScore> scores;
-
-  const ScoresList({super.key, required this.scores});
-
-  @override
-  State<ScoresList> createState() => _ScoresListState();
-}
-
-class _ScoresListState extends State<ScoresList> {
   @override
   Widget build(BuildContext context) {
-    if (widget.scores.isEmpty) {
+    if (users.isEmpty) {
       return const Center(
-        child: Text('No matches currently available'),
+        child: Text('No users available'),
       );
     }
 
-    return RefreshIndicator(
-      onRefresh: () async {
-        context.read<CricketBloc>().add(FetchCricketScores());
-      },
-      child: ListView.builder(
-        itemCount: widget.scores.length,
-        itemBuilder: (context, index) {
-          final score = widget.scores[index];
-          return Card(
-            margin: const EdgeInsets.all(8.0),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    '${score.team1} vs ${score.team2}',
-                    style: const TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                    ),
+    return ListView.builder(
+      itemCount: users.length,
+      itemBuilder: (context, index) {
+        final user = users[index];
+        return Card(
+          margin: const EdgeInsets.all(8.0),
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'ID: ${user.id}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: Colors.grey,
                   ),
-                  const SizedBox(height: 8),
-                  Text(
-                    score.score,
-                    style: const TextStyle(
-                      fontSize: 16,
-                      color: Colors.green,
-                    ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${user.firstName} ${user.lastName}',
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
                   ),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(
-                        score.status,
-                        style: const TextStyle(
-                          fontSize: 14,
-                          fontStyle: FontStyle.italic,
-                        ),
-                      ),
-                      Text(
-                        'Updated: ${_formatTime(score.lastUpdated)}',
-                        style: const TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ],
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Email: ${user.email}',
+                  style: const TextStyle(
+                    fontSize: 14,
                   ),
-                ],
-              ),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Age: ${user.age} | Gender: ${user.gender.toString().split('.').last}',
+                  style: const TextStyle(
+                    fontSize: 14,
+                  ),
+                ),
+              ],
             ),
-          );
-        },
-      ),
+          ),
+        );
+      },
     );
-  }
-
-  String _formatTime(DateTime time) {
-    return '${time.hour}:${time.minute.toString().padLeft(2, '0')}:${time.second.toString().padLeft(2, '0')}';
   }
 }

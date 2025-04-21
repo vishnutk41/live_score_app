@@ -5,50 +5,57 @@ import 'package:cricket_score_app/bloc/cricket_state.dart';
 import 'package:cricket_score_app/models/cricket_score.dart';
 import 'package:dio/dio.dart';
 
-class CricketBloc extends Bloc<CricketEvent, CricketState> {
+class UserBloc extends Bloc<UserEvent, UserState> {
   final String apiUrl = 'https://mp357760872f36b8d270.free.beeceptor.com/data';
   final Dio _dio = Dio();
-  Timer? _timer;
+  StreamSubscription? _userSubscription;
 
-  CricketBloc() : super(CricketInitial()) {
-    on<FetchCricketScores>(_onFetchCricketScores);
-    _startPolling();
+  UserBloc() : super(UserInitial()) {
+    _dio.options.validateStatus = (status) => true;
+
+    on<StartUserStream>(_onStartUserStream);
+    add(StartUserStream());
   }
 
-  void _startPolling() {
-    _timer = Timer.periodic(const Duration(seconds: 5), (timer) {
-      add(FetchCricketScores());
-    });
-  }
-
-  Future<void> _onFetchCricketScores(
-    FetchCricketScores event,
-    Emitter<CricketState> emit,
+  Future<void> _onStartUserStream(
+    StartUserStream event,
+    Emitter<UserState> emit,
   ) async {
-    emit(CricketLoadInProgress());
+    _userSubscription?.cancel();
+
+    await _fetchData(emit);
+
+    _userSubscription = Stream.periodic(const Duration(seconds: 5))
+        .asyncMap((_) => _fetchData(emit))
+        .listen((_) {});
+  }
+
+  Future<void> _fetchData(Emitter<UserState> emit) async {
     try {
       final response = await _dio.get(apiUrl);
-      print(response.data);
 
-      List<CricketScore> scores = [];
-
-      if (response.data is List) {
-        scores = (response.data as List)
-            .map((json) => CricketScore.fromJson(json))
-            .toList();
-      } else if (response.data is Map<String, dynamic>) {
-        scores = [CricketScore.fromJson(response.data)];
+      if (response.statusCode == 200) {
+        final userData = UserDataModel.fromJson(response.data);
+        if (!emit.isDone) {
+          emit(UserLoadSuccess(userData));
+        }
+      } else if (response.statusCode == 429) {
+        print('Rate limited - will retry shortly');
+      } else {
+        if (!emit.isDone) {
+          emit(UserLoadFailure('Server returned ${response.statusCode}'));
+        }
       }
-
-      emit(CricketLoadSuccess(scores));
     } catch (e) {
-      emit(CricketLoadFailure(e.toString()));
+      if (!emit.isDone) {
+        emit(UserLoadFailure('Error fetching data: $e'));
+      }
     }
   }
 
   @override
   Future<void> close() {
-    _timer?.cancel();
+    _userSubscription?.cancel();
     return super.close();
   }
 }

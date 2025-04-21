@@ -1,30 +1,30 @@
+import 'package:cricket_score_app/models/cricket_score.dart';
 import 'package:equatable/equatable.dart';
-import '../models/cricket_score.dart';
 
-abstract class CricketState extends Equatable {
-  const CricketState();
+abstract class UserState extends Equatable {
+  const UserState();
 
   @override
   List<Object> get props => [];
 }
 
-class CricketInitial extends CricketState {}
+class UserInitial extends UserState {}
 
-class CricketLoadInProgress extends CricketState {}
+class UserLoadInProgress extends UserState {}
 
-class CricketLoadSuccess extends CricketState {
-  final List<CricketScore> scores;
+class UserLoadSuccess extends UserState {
+  final UserDataModel userData;
 
-  const CricketLoadSuccess(this.scores);
+  const UserLoadSuccess(this.userData);
 
   @override
-  List<Object> get props => [scores];
+  List<Object> get props => [userData];
 }
 
-class CricketLoadFailure extends CricketState {
+class UserLoadFailure extends UserState {
   final String error;
 
-  const CricketLoadFailure(this.error);
+  const UserLoadFailure(this.error);
 
   @override
   List<Object> get props => [error];

@@ -1,10 +1,10 @@
 import 'package:equatable/equatable.dart';
 
-abstract class CricketEvent extends Equatable {
-  const CricketEvent();
+abstract class UserEvent extends Equatable {
+  const UserEvent();
 
   @override
   List<Object> get props => [];
 }
 
-class FetchCricketScores extends CricketEvent {}
+class StartUserStream extends UserEvent {}
