@@ -160,8 +160,6 @@ class User {
       };
 }
 
-// ... (keep all the other enum and helper classes from your original model)
-
 class Address {
     String address;
     String city;

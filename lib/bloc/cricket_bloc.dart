@@ -40,7 +40,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           emit(UserLoadSuccess(userData));
         }
       } else if (response.statusCode == 429) {
-        print('Rate limited - will retry shortly');
+        print('Too Many requests');
       } else {
         if (!emit.isDone) {
           emit(UserLoadFailure('Server returned ${response.statusCode}'));
